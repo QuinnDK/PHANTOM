@@ -1,0 +1,9 @@
+networkx
+numpy
+pathos
+jsonpickle
+matplotlib
+seaborn
+ordered_set
+simpy
+pytest

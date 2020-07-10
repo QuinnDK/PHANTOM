@@ -202,9 +202,9 @@ class Network:
         peers = set(self._network_graph.neighbors(miner_name))
         if self._completely_connected_malicious_miners:
             if miner_name in self._malicious_miner_names:
-                peers |= self._network_graph.nodes()
+                peers |= set(self._network_graph.nodes())
             else:
-                peers |= self._malicious_miner_names
+                peers |= set(self._malicious_miner_names)
 
         for peer_name in peers:
             self.send_block(miner_name, peer_name, block)

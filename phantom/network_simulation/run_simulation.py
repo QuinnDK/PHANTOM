@@ -74,7 +74,7 @@ def run_simulation() -> bool:
     k = 10
     confirmation_depth = 100
     malicious_hash_ratio = 0.45
-    number_of_honest_miners = 5
+    number_of_honest_miners = 10
     hash_rate_parameter = 5
     honest_hash_rates, malicious_hash_rates = generate_hash_rates(hash_rate_parameter, number_of_honest_miners,
                                                                   malicious_hash_ratio)
