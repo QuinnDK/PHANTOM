@@ -1,11 +1,11 @@
 from typing import Set, AbstractSet
 from collections import deque
 
-from phantom.dag import Block, MaliciousDAG
-from .greedy_phantom import GreedyPHANTOM
+from dagconsensus.dag import Block, MaliciousDAG
+from .greedy import Greedy
 
 
-class CompetingChainGreedyPHANTOM(GreedyPHANTOM, MaliciousDAG):
+class CompetingChainGreedy(Greedy, MaliciousDAG):
     """
     A variant of the greedy phantom that allows a miner to mine a competing coloring chain.
     """
@@ -18,7 +18,7 @@ class CompetingChainGreedyPHANTOM(GreedyPHANTOM, MaliciousDAG):
         super().__init__(k)
 
         # A copy of the honest sub-DAG of the current DAG
-        self._honest_dag = GreedyPHANTOM(k)
+        self._honest_dag = Greedy(k)
 
         # The global id of hte bluest honest node
         self._bluest_honest_block_gid = None

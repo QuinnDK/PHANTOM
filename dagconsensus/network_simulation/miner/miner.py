@@ -6,8 +6,8 @@ from typing import Iterable, Union, Set
 import networkx as nx
 import numpy as np
 
-from phantom.network_simulation.network import Network
-from phantom.dag import Block, DAG
+from dagconsensus.network_simulation.network import Network
+from dagconsensus.dag import Block, DAG
 
 
 class Miner:

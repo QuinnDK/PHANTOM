@@ -1,6 +1,6 @@
 import pytest
 
-from phantom.phantom import PHANTOM
+from dagconsensus.phantom import PHANTOM
 from .test_phantom import TestPHANTOM
 
 

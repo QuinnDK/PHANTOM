@@ -1,9 +1,9 @@
 import uuid
 import pytest
 
-from phantom.dag import Block
-from phantom.phantom import GreedyPHANTOM, CompetingChainGreedyPHANTOM
-from phantom.network_simulation import Miner, MaliciousMiner, Network
+from dagconsensus.dag import Block
+from dagconsensus.color_order import GreedyPHANTOM, CompetingChainGreedyPHANTOM
+from dagconsensus.network_simulation import Miner, MaliciousMiner, Network
 
 
 MINER = 'miner'

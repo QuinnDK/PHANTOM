@@ -4,7 +4,7 @@ import random
 import numpy
 import sys
 
-from phantom.dag import Block, DAG
+from dagconsensus.dag import Block, DAG
 from typing import Iterator, Iterable, Set, Union
 
 

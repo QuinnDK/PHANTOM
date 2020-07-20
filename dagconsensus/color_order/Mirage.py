@@ -9,24 +9,25 @@ import matplotlib.pyplot as plt
 import networkx as nx
 import numpy as np
 
-from phantom.dag import DAG, Block
+from dagconsensus.dag import DAG, Block
 
 
 class PHANTOM(DAG):
     """
-    An implementation of the DAG for the SPECTRE 2 protocol.
+
+    执行spectre2协议的DAG。
     """
 
-    # Dictionary key for the block of each block
+    # 每个块的字典键
     _BLOCK_DATA_KEY = "block_data"
 
-    # Dictionary key for the local id of each block
+    # 每个块的本地id的字典键
     _LID_KEY = 'lid'
 
-    # Dictionary key for the blue anticone of each block
+    # 为每个块的蓝色反锥按字典键
     _BAC_KEY = 'blue_anticone'
 
-    # The local id of the genesis.
+    # 起源的本地id
     _GENESIS_LID = 0
 
     def __init__(self, k: int = None):
@@ -37,13 +38,11 @@ class PHANTOM(DAG):
         self._coloring = set()      # Set of all the blue blocks according to the virtual block
         self._genesis_gid = None    # The global id of the genesis block
 
-        # k is received as a parameter because the network delay and security parameters
-        # can change over time, and because the DAG is only a container - the Miner is the
-        # one that should care about these parameters, the PHANTOM DAG only cares about k.
+        # k被作为一个参数接收，因为网络延迟和安全参数会随着时间的推移而变化，而且DAG只是一个容器——矿工应该关心这些参数，DAG只关心k。
         if k is None:
             k = self.calculate_k()
 
-        self._k = k                 # the maximal blue anticone size for a blue block
+        self._k = k                 # 蓝色块的最大蓝色反锥尺寸
 
     def __contains__(self, global_id: Block.GlobalID) -> bool:
         return global_id in self._G

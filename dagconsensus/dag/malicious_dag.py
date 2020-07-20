@@ -1,7 +1,7 @@
 from typing import AbstractSet
 from abc import abstractmethod
 
-from phantom.dag import Block, DAG
+from dagconsensus.dag import Block, DAG
 
 
 class MaliciousDAG(DAG):

@@ -10,7 +10,7 @@ import numpy
 import simpy
 import simpy.util
 
-from phantom.dag import Block, DAG, MaliciousDAG
+from dagconsensus.dag import Block, DAG, MaliciousDAG
 from .miner import Miner, MaliciousMiner
 from .network import Network
 

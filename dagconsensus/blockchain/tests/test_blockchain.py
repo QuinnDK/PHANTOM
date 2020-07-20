@@ -1,7 +1,7 @@
 import pytest
 
-from phantom.dag import Block
-from phantom.blockchain import Blockchain
+from dagconsensus.dag import Block
+from dagconsensus.blockchain import Blockchain
 
 
 class TestBlockchain:

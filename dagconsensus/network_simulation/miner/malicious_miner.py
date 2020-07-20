@@ -2,7 +2,7 @@ import uuid
 from collections import deque
 
 from typing import Deque
-from phantom.dag import Block, MaliciousDAG
+from dagconsensus.dag import Block, MaliciousDAG
 from .miner import Miner
 
 

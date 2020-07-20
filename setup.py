@@ -13,7 +13,7 @@ setup(
     url='https://github.cs.huji.ac.il/aviv-yaish/PHANTOM',
     author='Aviv Yaish',
     author_email='aviv.yaish@mail.huji.ac.il',
-    packages=['phantom'],
+    packages=['dagconsensus'],
     long_description=readme(),
     python_requires='>=3.6',
     install_requires=[

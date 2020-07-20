@@ -4,9 +4,9 @@ from typing import AbstractSet
 
 class Block(Hashable):
     """
-    An implementation of a generic block.
-    Some terminology:
-    Global ID of a block - the hash of the block.
+    通用块的实现
+    一些术语:
+    块的全局ID————块的散列
     """
     GlobalID = int
     BlockSize = float
@@ -16,11 +16,11 @@ class Block(Hashable):
                  size: BlockSize = 0,
                  data: Hashable = None):
         """
-        Initializes the block.
-        :param global_id: the global id of the block.
-        :param parents: the global ids of this block's parent blocks
-        :param size: the size of the block.
-        :param data: optional, additional data included in the block.
+        初始化块
+        :param global_id: 块的全局id。
+        :param parents: 该块的父块的全局ID
+        :param size: 块的大小
+        :param data: 块中包含的可选附加数据
         """
         self._gid = global_id
         self._parents = parents
@@ -29,7 +29,7 @@ class Block(Hashable):
 
     def get_parents(self) -> AbstractSet[GlobalID]:
         """
-        :return: the global ids of this block's parent blocks.
+        :return: 该块的父块的全局ID
         """
         return self._parents
 

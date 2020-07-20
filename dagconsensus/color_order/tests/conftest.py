@@ -4,8 +4,8 @@ The tests configuration file, contains several important fixtures.
 
 import pytest
 
-from phantom.dag import Block
-from phantom.phantom import PHANTOM, GreedyPHANTOM, CompetingChainGreedyPHANTOM
+from dagconsensus.dag import Block
+from dagconsensus.phantom import PHANTOM, GreedyPHANTOM, CompetingChainGreedyPHANTOM
 
 
 # DAG types

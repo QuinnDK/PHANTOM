@@ -5,8 +5,8 @@ import numpy
 
 from typing import Callable, Iterable, Tuple, List
 
-from phantom.phantom import GreedyPHANTOM, CompetingChainGreedyPHANTOM
-from phantom.network_simulation import Simulation
+from dagconsensus.color_order import Greedy, CompetingChainGreedy
+from dagconsensus.network_simulation import Simulation
 
 # Default block size in bytes.
 DEFAULT_BLOCK_SIZE = 1 << 20
@@ -15,27 +15,27 @@ DEFAULT_BLOCK_SIZE = 1 << 20
 DEFAULT_MAX_PEER_NUM = 2
 
 
-def greedy_constructor_with_parameters(k) -> Callable[..., GreedyPHANTOM]:
+def greedy_constructor_with_parameters(k) -> Callable[..., Greedy]:
     """
     :return: a callable constructor with no parameters such that the given
     parameters are "baked-in" as its parameters.
     """
 
-    def to_return() -> GreedyPHANTOM:
-        return GreedyPHANTOM(k=k)
+    def to_return() -> Greedy:
+        return Greedy(k=k)
 
     return to_return
 
 
 def competing_chain_constructor_with_parameters(k, confirmation_depth, maximal_depth_difference) \
-        -> Callable[..., CompetingChainGreedyPHANTOM]:
+        -> Callable[..., CompetingChainGreedy]:
     """
     :return: a callable constructor with no parameters such that the given
     parameters are "baked-in" as its parameters.
     """
 
-    def to_return() -> CompetingChainGreedyPHANTOM:
-        return CompetingChainGreedyPHANTOM(k=k,
+    def to_return() -> CompetingChainGreedy:
+        return CompetingChainGreedy(k=k,
                                            confirmation_depth=confirmation_depth,
                                            maximal_depth_difference=maximal_depth_difference)
 
@@ -74,7 +74,7 @@ def run_simulation() -> bool:
     k = 10
     confirmation_depth = 100
     malicious_hash_ratio = 0.45
-    number_of_honest_miners = 10
+    number_of_honest_miners = 5
     hash_rate_parameter = 5
     honest_hash_rates, malicious_hash_rates = generate_hash_rates(hash_rate_parameter, number_of_honest_miners,
                                                                   malicious_hash_ratio)

@@ -7,8 +7,8 @@ from random import randint, sample
 from typing import AbstractSet, List
 from networkx import DiGraph
 from .test_phantom import TestPHANTOM
-from phantom.dag import Block
-from phantom.phantom import GreedyPHANTOM
+from dagconsensus.dag import Block
+from dagconsensus.phantom import GreedyPHANTOM
 
 
 class TestGreedyColoring:

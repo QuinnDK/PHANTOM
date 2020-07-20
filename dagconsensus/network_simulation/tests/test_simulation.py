@@ -2,10 +2,10 @@ import pytest
 
 from typing import Callable, Iterable
 
-from phantom.dag import Block, DAG, MaliciousDAG
-from phantom.phantom import GreedyPHANTOM
-from phantom.network_simulation import Simulation
-from phantom.network_simulation.run_simulation import competing_chain_constructor_with_parameters
+from dagconsensus.dag import Block, DAG, MaliciousDAG
+from dagconsensus.phantom import GreedyPHANTOM
+from dagconsensus.network_simulation import Simulation
+from dagconsensus.network_simulation.run_simulation import competing_chain_constructor_with_parameters
 
 
 class TestSimulation:

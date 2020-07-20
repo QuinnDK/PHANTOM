@@ -15,8 +15,8 @@ from pathos.multiprocessing import ProcessingPool as Pool
 from scipy.stats import norm as normal_dist
 from typing import Iterator, Dict, Any, Iterable, Tuple, List, Callable
 
-from phantom.network_simulation import Simulation
-from phantom.network_simulation.run_simulation import greedy_constructor_with_parameters, \
+from dagconsensus.network_simulation import Simulation
+from dagconsensus.network_simulation.run_simulation import greedy_constructor_with_parameters, \
     competing_chain_constructor_with_parameters, generate_hash_rates
 
 # Default path to save all result files

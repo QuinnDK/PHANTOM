@@ -1,7 +1,7 @@
 import pytest
 
-from phantom.dag import Block
-from phantom.phantom import CompetingChainGreedyPHANTOM
+from dagconsensus.dag import Block
+from dagconsensus.phantom import CompetingChainGreedyPHANTOM
 
 
 @pytest.fixture
