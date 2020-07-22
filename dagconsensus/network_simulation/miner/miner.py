@@ -12,12 +12,12 @@ from dagconsensus.dag import Block, DAG
 
 class Miner:
     """
-    A miner on the network.
+    网络中的矿工
     """
-    # A type for the miner name
+    # 矿工名
     Name = str
 
-    # Data key for the blocks in _block_queue
+    # 数据键为块队列中的块
     _BLOCK_DATA_KEY = "to_add_block_data"
 
     def __init__(self,
@@ -28,13 +28,13 @@ class Miner:
                  fetch_requested_blocks: bool = False,
                  broadcast_added_blocks: bool = False):
         """
-        Initializes the miner.
-        :param name: the name of the miner.
-        :param dag: the DAG the miner uses.
-        :param max_peer_num: the miner's maximal number of peers.
-        :param block_size: the maximal block size, in bytes.
-        :param fetch_requested_blocks: True if the miner should fetch blocks requested from it that it doesn't have.
-        :param broadcast_added_blocks: True if the miner should broadcast all blocks that it adds to its DAG.
+        初始化矿工
+        :param name: 矿工名.
+        :param dag: 矿工使用的类型.
+        :param max_peer_num: 矿工的最大对等点数.
+        :param block_size: 块大小.
+        :param fetch_requested_blocks: 如果矿工获取它没有的请求块，则为True.
+        :param broadcast_added_blocks:如果矿工广播它添加到其DAG中的所有块，则为True
         """
         self._name = name
         self._dag = dag
@@ -43,26 +43,26 @@ class Miner:
         self._fetch_requested_blocks = fetch_requested_blocks
         self._broadcast_added_blocks = broadcast_added_blocks
 
-        self._block_queue = nx.DiGraph()  # a queue of blocks that are waiting to be added to the miner's DAG
+        self._block_queue = nx.DiGraph()  # 等待添加到矿工DAG中的块队列
         self._mined_blocks_gids: Set[Block.GlobalID] = set()
         self._network = None
 
     def set_network(self, network: Network):
         """
-        Sets the miner's network.
+        矿工的网络设置
         """
         self._network = network
 
     def __contains__(self, global_id: Block.GlobalID) -> bool:
         """
-        :return: True iff the block with the given global id is in the miner's DAG
+        :return: 如果具有给定全局id的块在矿工的DAG中，则为True
         """
         return global_id in self._dag
 
     def send_block(self, recipient_name: Name, global_id: Block.GlobalID):
         """
-        If the block with the given global id exists in this miner's DAG, sends it to the miner with the given name
-        If doesn't have the block, fetches it according to the miner's behavior.
+        如果该矿工的DAG中存在具有给定全局ID的块，则将其发送给具有给定名称的矿工
+        如果没有该块，则根据矿工的行为进行获取.
         """
         if global_id in self._dag:
             self._network.send_block(self._name, recipient_name, self._dag[global_id])
@@ -71,13 +71,13 @@ class Miner:
 
     def _broadcast_block(self, block):
         """
-        Broadcasts the given block to all the network.
+        将给定的块广播到所有网络。
         """
         self._network.broadcast_block(self._name, block)
 
     def _fetch_block(self, block_gid):
         """
-        Fetches the block with the given global id from the network.
+        从网络中获取具有给定全局id的块。
         """
         self._network.fetch_block(self._name, block_gid)
         self._block_queue.add_node(block_gid)
@@ -85,8 +85,8 @@ class Miner:
 
     def _add_to_block_queue(self, block):
         """
-        Adds the given block to the block queue, if necessary.
-        :return: True iff the block was added to the queue.
+        如果需要，将给定的块添加到块队列中
+        :return: 如果块被添加到队列中，则为Ture.
         """
         missing_parent = False
         for parent_gid in block.get_parents():
@@ -104,7 +104,7 @@ class Miner:
 
     def _basic_block_add(self, block):
         """
-        Adds the given block without checking if its parents are present.
+        添加给定块而不检查其父块是否存在。
         """
         self._dag.add(block)
         if self._broadcast_added_blocks:
@@ -130,14 +130,14 @@ class Miner:
 
     def _is_valid(self, block):
         """
-        :return: True iff the block is valid according to the rules followed by the miner.
+        :return: 如果根据矿工遵循的规则，该区块有效，则为真.
         """
         return sys.getsizeof(block) <= self._block_size
 
     def add_block(self, block: Block) -> bool:
         """
-        Adds a given block to the miner's dag.
-        :return: True iff adding the block was successful.
+        将一个给定的块添加到矿工的dag中。
+        :return: 添加块成功则为Ture。
         """
         if not self._is_valid(block):
             return False
@@ -157,68 +157,68 @@ class Miner:
 
     def mine_block(self) -> Union[Block, None]:
         """
-        :return: the mined block or None if mining was unsuccessful.
+        :return: 开采的区块；如果开采失败，则返回None
         """
         gid = hash(uuid.uuid4().int)
         block = Block(global_id=gid,
                       parents=self._dag.get_virtual_block_parents().copy(),
-                      size=self._block_size,  # assume for the simulation's purposes that blocks are maximal
-                      data=self._name)  # use the data field to hold the miner's name for better logs
+                      size=self._block_size,  #为了模拟的目的，假设块是最大的
+                      data=self._name)  # 使用data字段保存矿机的名称，以获得更好的日志
         if not self.add_block(block):
             return None
         if not self._broadcast_added_blocks:
-            # The block will be broadcast by _basic_block_add
+            # 该块将通过_basic_block_add广播
             self._broadcast_block(block)
         self._mined_blocks_gids.add(gid)
         return block
 
     def discover_peers(self):
         """
-        Adds peers up to the maximal defined amount.
+        将对等点添加到已定义的最大数量.
         """
         self.add_peers(self._network.discover_peers(self._name, self._max_peer_num))
 
     def add_peers(self, peers: Iterable[Name]):
         """
-        Adds the given miners as peers to this miner.
+        将给定的矿工作为对等方添加到此矿工。
         """
         self._network.add_peers(self._name, peers)
 
     def remove_peers(self, peers: Iterable[Name]):
         """
-        Unpeers the given miners from this miner.
+       从该矿工中取消给定矿工的对等.
         """
         self._network.remove_peers(self._name, peers)
 
     def get_depth(self, global_id: Block.GlobalID) -> int:
         """
-        :return: the depth in the "main" sub-DAG of the block with the given global id if it exists in the miner's DAG.
+        :return: 具有给定全局ID的块的“主”子DAG中的深度（如果存在于矿工的DAG中）
         """
         return self._dag.get_depth(global_id)
 
     def draw_dag(self, with_labels: bool = False):
         """
-        Draws the DAG of the miner.
-        The bigger blocks are the ones mined by the miner.
-        :param with_labels: prints node labels iff True.
+        绘制矿工的DAG.
+        较大的块是矿工开采的块.
+        :param with_labels: 打印节点标签iff为真。
         """
         self._dag.draw(self._mined_blocks_gids, with_labels)
 
     def get_name(self) -> Name:
         """
-        :return: the name of the miner.
+        :return: 矿工的名称.
         """
         return self._name
 
     def get_mined_blocks(self) -> Set:
         """
-        :return: a set of all the blocks mined by this Miner.
+        :return: 该矿工开采的所有区块的集合.
         """
         return self._mined_blocks_gids
 
     def __str__(self):
         """
-        :return: a string representation of the miner.
+        :return: 矿工的字符串表示形式.
         """
         return ', '.join([
             "miner: " + self._name,

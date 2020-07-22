@@ -3,11 +3,11 @@ from ordered_set import OrderedSet
 from collections import deque, ChainMap, namedtuple
 from typing import Iterable, Iterator, AbstractSet, Collection, Dict, Union, List, Tuple
 
-from dagconsensus.color_order import PHANTOM
+from dagconsensus.color_order import Mirage
 from dagconsensus.dag import Block
 
 
-class Greedy(PHANTOM):
+class Greedy(Mirage):
     """
     贪婪算法的实现
     """

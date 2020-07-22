@@ -1,5 +1,5 @@
 """
-A simple run script to run the simulation a single time.
+一个简单的运行脚本可以一次运行模拟
 """
 import numpy
 
@@ -8,19 +8,17 @@ from typing import Callable, Iterable, Tuple, List
 from dagconsensus.color_order import Greedy, CompetingChainGreedy
 from dagconsensus.network_simulation import Simulation
 
-# Default block size in bytes.
+# 默认块大小(以字节为单位)。
 DEFAULT_BLOCK_SIZE = 1 << 20
 
-# The default max neighbor num
+# 默认最大邻居数
 DEFAULT_MAX_PEER_NUM = 2
 
 
 def greedy_constructor_with_parameters(k) -> Callable[..., Greedy]:
     """
-    :return: a callable constructor with no parameters such that the given
-    parameters are "baked-in" as its parameters.
+    :return: 不带参数的可调用构造函数，因此给定的参数被作为其参数“封装”。
     """
-
     def to_return() -> Greedy:
         return Greedy(k=k)
 
@@ -30,8 +28,7 @@ def greedy_constructor_with_parameters(k) -> Callable[..., Greedy]:
 def competing_chain_constructor_with_parameters(k, confirmation_depth, maximal_depth_difference) \
         -> Callable[..., CompetingChainGreedy]:
     """
-    :return: a callable constructor with no parameters such that the given
-    parameters are "baked-in" as its parameters.
+    :return: 不带参数的可调用构造函数，因此给定的参数被作为其参数“封装”。
     """
 
     def to_return() -> CompetingChainGreedy:
@@ -67,8 +64,8 @@ def generate_hash_rates(hash_rate_parameter: int, number_of_honest_miners: int, 
 
 def run_simulation() -> bool:
     """
-    Runs the simulation.
-    :return: if the attack succeeded.
+    运行模拟
+    :return: 如果攻击成功。
     """
     blocks_per_minute = 1
     k = 10
@@ -80,15 +77,14 @@ def run_simulation() -> bool:
                                                                   malicious_hash_ratio)
     maximal_depth_difference = round(confirmation_depth * malicious_hash_ratio) + 1
 
-    # simulation runs long enough for 3 attack attempts (actually much more, because the maximal
-    # depth difference for the malicious miner is at most 1/2 of the confirmation depth)
+    # 模拟运行足够长的时间来进行3次攻击尝试（实际上要多得多，因为恶意矿工的最大深度差最大为确认深度的1/2）
     simulation_length = round(confirmation_depth * 3 * 60 / blocks_per_minute)
 
-    # all time-related parameters are in seconds
+    # 所有时间相关的参数都以秒为单位
     simulation = Simulation(honest_hash_rates=honest_hash_rates,
                             malicious_hash_rates=malicious_hash_rates,
                             block_creation_rate=blocks_per_minute * 60,
-                            propagation_delay_parameter=30,  # propagation delay is at most 30 seconds
+                            propagation_delay_parameter=30,  # 传播延迟最多30秒
                             security_parameter=0.1,
                             simulation_length=simulation_length,
                             honest_dag_init=greedy_constructor_with_parameters(k),

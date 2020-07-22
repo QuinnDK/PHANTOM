@@ -12,7 +12,7 @@ import numpy as np
 from dagconsensus.dag import DAG, Block
 
 
-class PHANTOM(DAG):
+class Mirage(DAG):
     """
 
     执行spectre2协议的DAG。

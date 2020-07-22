@@ -7,41 +7,39 @@ from .greedy import Greedy
 
 class CompetingChainGreedy(Greedy, MaliciousDAG):
     """
-    A variant of the greedy phantom that allows a miner to mine a competing coloring chain.
+    greedy phantom的一种变体，允许矿工开采竞争的着色链
     """
 
-    # A block is confirmed if it is in the blue past of a block in the main coloring chain that
-    # has at least X blue past (picked by the user))
-    # publish the parallel chain when you see that the order is changed (success) or when you see that it is too
-    # deep to be changed
+    # 当您看到顺序更改（成功）时，或者当主着色链中至少有X个蓝色过去（由用户选择）的块处于蓝色过去时，
+    # 将确认该块是否发布并行链。 您会发现它太深了，无法更改
     def __init__(self, k: int = None, confirmation_depth: int = 5, maximal_depth_difference: int = 5):
         super().__init__(k)
 
-        # A copy of the honest sub-DAG of the current DAG
+        # 当前DAG的诚实子DAG的副本
         self._honest_dag = Greedy(k)
 
-        # The global id of hte bluest honest node
+        # 最诚实节点的全局id
         self._bluest_honest_block_gid = None
 
-        # The global id of the competing chains tip
+        # 竞争链的全局id尖端
         self._competing_chain_tip_gid = None
 
-        # The global id of the currently attacked block
+        # 当前被攻击块的全局id
         self._currently_attacked_block_gid = None
 
-        # The global id of the first block parallel to the currently attacked block
+        # 与当前被攻击块并行的第一个块的全局id
         self._first_parallel_block_gid = None
 
-        # A set of the gids of the antipast blocks of the competing chain's tip
+        # 竞争链末端的antipast块的一组gid
         self._competing_chain_tip_antipast = set()
 
-        # The parents of the virtual çompeting chain's tip
+        # 虚拟çompeting链的尖端的父母块
         self._virtual_competing_chain_block_parents = set()
 
-        # When a block's blue future is at least this amount, the block is considered to be confirmed
+        # 当一个区块的蓝色未来至少等于此数量时，该区块被视为已确认
         self._confirmation_depth = confirmation_depth
 
-        # Restart the attack when the blue past of the selfish tip is lagging by this amount
+        # 当自私技巧的蓝色过去滞后于此数量时，重新开始攻击
         self._maximal_depth_difference = maximal_depth_difference
 
         # A deque of all the global ids of the malicious blocks that are yet to be added to the honest DAG
@@ -50,7 +48,7 @@ class CompetingChainGreedy(Greedy, MaliciousDAG):
     def _get_competing_chain_tip_parents(self, tip_global_id: Block.GlobalID, tip_antipast: Set[Block.GlobalID],
                                          initial_parents: AbstractSet[Block.GlobalID]):
         """
-        :return: a set of the bottom-most (closest to the leaves) blocks that don't overshadow the given selfish tip.
+        :return: 一组最底部（最靠近叶子）的块，不会遮盖给定的自私尖端.
         """
         selfish_virtual_block_parents = set(initial_parents)
         visited = set(initial_parents)
@@ -65,7 +63,7 @@ class CompetingChainGreedy(Greedy, MaliciousDAG):
             if self._is_a_bluer_than_b(tip_global_id, gid):
                 selfish_virtual_block_parents.add(gid)
 
-                # removes all ancestors
+                # 删除所有的祖先
                 ancestor_queue = deque()
                 ancestor_queue.extend(self._G.successors(gid))
                 while ancestor_queue:
@@ -85,7 +83,7 @@ class CompetingChainGreedy(Greedy, MaliciousDAG):
 
     def _add_malicious_blocks_to_honest_dag(self):
         """
-        Adds the malicious blocks to the honest DAG.
+        将恶意块添加到诚实DAG。
         """
         while self._malicious_blocks_to_add_to_honest_dag:
             self._honest_dag.add(self[self._malicious_blocks_to_add_to_honest_dag.popleft()])
@@ -100,32 +98,30 @@ class CompetingChainGreedy(Greedy, MaliciousDAG):
             if self.did_attack_fail():
                 self._first_parallel_block_gid = global_id
 
-            # The malicious attack generates a chain, so the new tip is the current block
+            # 恶意攻击生成一个链，因此新的提示是当前块
             self._competing_chain_tip_gid = global_id
             self._competing_chain_tip_antipast -= self._G.node[global_id][self._BLUE_DIFF_PAST_ORDER_KEY].keys()
             self._competing_chain_tip_antipast -= self._G.node[global_id][self._RED_DIFF_PAST_ORDER_KEY].keys()
 
-            # Because we are under the assumption that a selfish miner has zero network latency and the
-            # simulation design, the assumption is that no new blocks are mined between the moment a new
-            # selfish block is mined and the moment it is added to the DAG
+            # 因为我们假设自私的矿工的网络延迟为零，并且进行了仿真设计，
+            # 所以假设在开采新的自私的区块与将其添加到DAG的时刻之间没有新的区块被开采
             self._virtual_competing_chain_block_parents = \
                 self._get_competing_chain_tip_parents(global_id,
                                                       self._competing_chain_tip_antipast,
                                                       block.get_parents())
         else:
-            # Add malicious blocks to the honest DAG as soon as possible
+            # 尽快将恶意块添加到诚实DAG
             if self.did_attack_fail():
                 self._add_malicious_blocks_to_honest_dag()
 
-            # This is possible because this is a competing chain attack,
-            # where the honest chain doesn't include any malicious blocks
+            # T他的攻击是可能的，因为这是一个竞争链攻击，诚实链尽可能不包括任何恶意的区块最DAG
             self._honest_dag.add(block)
 
         if self.did_attack_succeed():
             self._add_malicious_blocks_to_honest_dag()
 
         if not self.did_attack_fail():
-            # need to update the data structure only if in the middle of a (seemingly) successful attack
+            # 仅在（看似）成功的攻击过程中才需要更新数据结构
             self._competing_chain_tip_antipast.add(global_id)
             if global_id == self._competing_chain_tip_gid or \
                     self._is_a_bluer_than_b(self._competing_chain_tip_gid, global_id):
@@ -136,7 +132,7 @@ class CompetingChainGreedy(Greedy, MaliciousDAG):
 
     def _stop_attack(self):
         """
-        Ends the current attack.
+        结束当前攻击
         """
         self._add_malicious_blocks_to_honest_dag()
         self._competing_chain_tip_gid = None
@@ -144,7 +140,7 @@ class CompetingChainGreedy(Greedy, MaliciousDAG):
 
     def _restart_attack(self):
         """
-        Starts a new attack.
+        开始新一轮进攻
         """
         self._stop_attack()
         self._competing_chain_tip_antipast = set(self._honest_dag._antipast)
@@ -156,12 +152,10 @@ class CompetingChainGreedy(Greedy, MaliciousDAG):
 
     def _is_attack_viable(self) -> bool:
         if self.did_attack_fail():
-            # The previous attack failed, so there is no attack currently,
-            # meaning that a new attack is viable.
+            # 先前的攻击失败，所以目前没有攻击，这意味着新的攻击是可行的
             return True
 
-        # An attack is viable iff the blue history difference between the honest and selfish tips is lower than the
-        # maximal gap that the user defined
+        # 如果诚实和自私尖端之间的蓝色历史差异小于用户定义的最大差距，则攻击是可行的
         return (self._G.node[self._coloring_tip_gid][self._BLUE_NUMBER_KEY] -
                 self._G.node[self._competing_chain_tip_gid][self._BLUE_NUMBER_KEY]) <= self._maximal_depth_difference
 
@@ -182,7 +176,7 @@ class CompetingChainGreedy(Greedy, MaliciousDAG):
 
     def set_k(self, k: int):
         """
-        :param k: the maximal anticone size for the blue blocks.
+        :param k: 蓝色块的最大anticone尺寸.
         """
         self._set_parameters({'k': k,
                               'confirmation_depth': self._confirmation_depth,

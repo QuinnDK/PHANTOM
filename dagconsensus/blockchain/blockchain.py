@@ -105,7 +105,7 @@ class Blockchain(DAG):
 
     def _chain_generator(self, tip_gid):
         """
-        :return: generator for a chain starting with the given tip and going backwards.
+        :return: 链的生成器，从给定的尖端开始，然后向后退
         """
         gid = tip_gid
         if gid is None:
@@ -120,7 +120,7 @@ class Blockchain(DAG):
 
     def _get_chain(self, tip_gid=None):
         """
-        :return: the longest chain as a set.
+        :return: 最长的链条.
         """
         if tip_gid is None:
             tip_gid = self._longest_chain_tip_gid
@@ -146,8 +146,7 @@ class Blockchain(DAG):
         return self._G.node[a][Blockchain._CHAIN_LENGTH_KEY] <= self._G.node[b][Blockchain._CHAIN_LENGTH_KEY]
 
     def draw(self, emphasized_blocks=set(), with_labels=False):
-        # could probably use phantom's draw here, but for design purposes I
-        # don't want to move the common code to DAG/create an ancestor class/use some form of composition
+        # 可能在这里使用幻像的绘制，但是出于设计目的，我不想将通用代码移至DAG /创建祖先类/使用某种形式的组合
         plt.figure()
         nx.draw_networkx(self._G,
                          pos=nx.spring_layout(self._G, k=10, iterations=10000),

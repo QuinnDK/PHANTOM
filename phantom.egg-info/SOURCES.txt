@@ -1,8 +1,0 @@
-README.md
-setup.cfg
-setup.py
-phantom.egg-info/PKG-INFO
-phantom.egg-info/SOURCES.txt
-phantom.egg-info/dependency_links.txt
-phantom.egg-info/requires.txt
-phantom.egg-info/top_level.txt

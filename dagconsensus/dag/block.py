@@ -40,4 +40,4 @@ class Block(Hashable):
         return "Block: " + str(self._gid) + ", parents: " + ', '. join([str(parent) for parent in self._parents])
 
     def __sizeof__(self):
-        return max(self._size - 24, 0)  # need to account for python's garbage collection overhead
+        return max(self._size - 24, 0)  # 需要考虑python的垃圾收集开销

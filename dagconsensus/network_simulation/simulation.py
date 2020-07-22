@@ -19,22 +19,22 @@ from typing import Callable, Iterable
 
 class Simulation:
     """
-    The main network_simulation event loop.
+    主网络模拟事件循环。
     """
 
-    # Default path to save all result files
+    # 保存所有结果文件的默认路径
     _DEFAULT_RESULTS_PATH = os.path.join(os.getcwd(), "results")
 
-    # Default path for the log files
+    # 日志文件的默认路径
     _DEFAULT_LOG_PATH = os.path.join(_DEFAULT_RESULTS_PATH, "logs")
 
-    # Suffix for log files
+    # 日志文件的后缀
     _LOG_FILE_SUFFIX = ".log"
 
-    # Default path for the simulation files
+    # 模拟文件的默认路径
     _DEFAULT_SIMULATION_PATH = os.path.join(_DEFAULT_RESULTS_PATH, "simulation")
 
-    # Suffix for simulation files
+    # 模拟文件的后缀
     _SIMULATION_FILE_SUFFIX = ".json"
 
     def __init__(self,
@@ -49,53 +49,47 @@ class Simulation:
                  median_speed: Block.BlockSize = 1 << 20,
                  max_block_size: Block.BlockSize = 1 << 20,
                  max_peer_number: float = 5,
-                 fetch_requested_blocks: bool = False,
-                 broadcast_added_blocks: bool = False,
+                 fetch_requested_blocks: bool = True,
+                 broadcast_added_blocks: bool = True,
                  no_delay_for_malicious_miners: bool = True,
                  completely_connected_malicious_miners: bool = True,
-                 simulate_miner_join_leave: bool = False,
+                 simulate_miner_join_leave: bool = True,
                  max_miner_count: float = float('inf'),
                  min_miner_count: int = 1,
                  miner_join_rate: int = 1000,
                  miner_leave_rate: int = 1000,
                  hash_rate_parameter: int = 2,
                  malicious_miner_probability: float = 0.1,
-                 enable_printing: bool = False,
+                 enable_printing: bool = True,
                  enable_logging: bool = False,
                  save_simulation: bool = False):
         """
         Initializes the simulation.
-        :param honest_hash_rates: a list of hash-rates that defines the initial hash distribution among honest miners.
-        :param malicious_hash_rates: a list of hash-rates that defines the initial hash distribution among malicious
-        miners.
-        :param block_creation_rate: the parameter defining the Poisson block generation process,
-        called lambda in the phantom paper. Measured in seconds.
-        :param propagation_delay_parameter: the upper bound on the propagation delay,
-        also called Dmax in the paper. Measured in seconds.
-        :param security_parameter: the security parameter called delta in the paper. It is a probability.
-        :param simulation_length: the simulation length in seconds (simulated seconds, not actual real world ones!)
-        :param honest_dag_init: the constructor to be used when creating honest DAGs.
-        :param malicious_dag_init: the constructor to be used when creating malicious DAGs.
-        :param median_speed: the median inter-Miner connection speed, in MB/s.
-        :param max_block_size: the maximal block size to be used by the miners.
-        :param max_peer_number: the maximal number of peers for miners on the network.
-        :param fetch_requested_blocks: True if the miners on the network should fetch blocks requested from them
-        that they don't have.
-        :param broadcast_added_blocks: True if the miners on the network should broadcast every block they add.
-        :param no_delay_for_malicious_miners: True if malicious miners should have no network delay.
-        :param completely_connected_malicious_miners: True if malicious miners should be connected to every node on the
-        network. Note that this only affects blocks that the malicious miners wants to send.
-        :param simulate_miner_join_leave: True if the simulation should add/remove miners on the fly.
-        :param max_miner_count: the maximal number of miners to be simulated.
-        :param min_miner_count: the minimal number of miners to be simulated.
-        :param miner_join_rate: the rate at which the simulation should add miners to the network.
-        :param miner_leave_rate: the rate at which the simulation should remove miners from the network.
-        :param hash_rate_parameter: the parameter for the hash-rate distribution among newly added miners.
-        :param malicious_miner_probability: the probability with which the simulation should pick a malicious miner as
-        the miner to add to the simulation.
-        :param enable_printing: True if the simulation should print the logs on the screen.
-        :param enable_logging: True if the simulation should save the logs to a file.
-        :param save_simulation: True if a copy of the simulation object should be saved to a file.
+        :param honest_hash_rates: 哈希率列表，定义诚实矿工之间的初始哈希分布
+        :param malicious_hash_rates: 哈希率列表，用于定义恶意软件之间的初始哈希分布矿工。
+        :param block_creation_rate: 定义泊松区块生成过程的参数,lambda. 以秒为单位.
+        :param propagation_delay_parameter: 传播延迟的上限,Dmax in the paper. 以秒为单位.
+        :param security_parameter: 本文中的安全参数称为delta。这是一个概率。
+        :param simulation_length: 以秒为单位的模拟长度（模拟的秒，不是实际的秒！）
+        :param honest_dag_init: 创建诚实DAGs时使用的构造函数。
+        :param malicious_dag_init: 创建恶意DAG时使用的构造函数。
+        :param median_speed: Miner间连接速度的中位数，以MB / s为单位。
+        :param max_block_size: 矿工使用的最大块大小。
+        :param max_peer_number: 网络上矿工的最大对等体数。
+        :param fetch_requested_blocks: 如果网络上的矿工从它们那里获取它们没有的请求块，则为True。
+        :param broadcast_added_blocks: 如果网络上的矿工应该广播他们添加的每个块，则为true。
+        :param no_delay_for_malicious_miners: 如果恶意矿工没有网络延迟，则为true。
+        :param completely_connected_malicious_miners: 如果将恶意矿工连接到网络上的每个节点，则为true。 请注意，这只会影响恶意矿工想要发送的块。
+        :param simulate_miner_join_leave: 如果模拟应动态添加/删除矿工，则为true。
+        :param max_miner_count: 要模拟的最大矿工数.
+        :param min_miner_count: 要模拟的最小数量的矿工。
+        :param miner_join_rate: t模拟将矿工添加到网络的速率。
+        :param miner_leave_rate: 模拟将矿工从网络中移除的速率。
+        :param hash_rate_parameter: 新添加的矿工之间的哈希率分布的参数。
+        :param malicious_miner_probability: 模拟应选择一个恶意矿工作为要添加到模拟中的矿工的概率。
+        :param enable_printing: 如果模拟应在屏幕上打印，则为True。
+        :param enable_logging: 如果模拟应将日志保存到文件，则为True
+        :param save_simulation: 如果应将模拟对象的副本保存到文件中，则为True。
         """
         self._logging = enable_logging
         self._save_simulation = save_simulation
@@ -110,9 +104,8 @@ class Simulation:
         self._block_creation_rate = block_creation_rate
         self._simulation_length = simulation_length
 
-        # To be honest, median speed doesn't really matter as the parameter can be "tucked into"
-        # the propagation delay parameter, but it is useful for unit conversion - by dividing block
-        # sizes that are in MBs by a median speed which is in MB/s, we get delay in seconds.
+        # 中值速度并不重要，因为可以将参数“塞入”传播延迟参数中，
+        # 但是它对单位转换很有用-通过将以MB为单位的块大小除以以MB / s，我们会延迟几秒钟。
         self._median_speed = median_speed
         self._max_block_size = max_block_size
 
@@ -158,19 +151,19 @@ class Simulation:
             self._add_miner(hash_rate=hash_rate,
                             discover_peers=False,
                             is_malicious=True)
-        # Let the miners discover peers only after adding them all
+        # 让矿工仅在将他们全部添加之后才能发现同伴
         for miner_name in self._network:
             self._network[miner_name].discover_peers()
 
     def _log(self, text: str):
         """
-        Logs the given text with the network_simulation's current timestamp.
+        用network_simulation的当前时间戳记录给定的文本。
         """
         logging.info("Time: " + str(self._env.now) + ", " + text)
 
     def _block_generator_process(self) -> simpy.Event:
         """
-        Generates blocks at a poisson rate with miners picked according to the hash-rate distribution.
+        以泊松速率生成块，并根据哈希率分布选择矿工。
         """
         while True:
             if len(self._network) > 0:
@@ -187,7 +180,7 @@ class Simulation:
                    discover_peers: bool = True,
                    is_malicious: bool= False) -> Miner:
         """
-        Generates a miner according to the given parameter, adds it to the simulation and returns it.
+        根据给定的参数生成一个矿工，将其添加到模拟中并返回。
         """
         self._miner_count += 1
 
@@ -211,7 +204,7 @@ class Simulation:
 
     def _miner_adder_process(self) -> simpy.Event:
         """
-        Adds miners at a poisson rate.
+        以泊松率增加矿工。
         """
         while len(self._network) < self._max_miner_count:
             miner = self._add_miner(hash_rate=numpy.random.poisson(self._hash_rate_parameter),
@@ -223,7 +216,7 @@ class Simulation:
 
     def _miner_remover_process(self) -> simpy.Event:
         """
-        Removes miners at a poisson rate.
+        以泊松率清除矿工。
         """
         while True:
             if len(self._network) > self._min_miner_count:
@@ -237,19 +230,18 @@ class Simulation:
 
     def _check_if_block_needed(self, sender_name: Miner.Name, receiver_name: Miner.Name, gid: Block.GlobalID) -> bool:
         """
-        :return: True iff the sending of the block with the given global id is possible and needed.
+        :return: 如果可以并且需要使用给定全局ID发送块，则为true。
         """
-        # The miners by default try to send blocks to a peer, even if a peer already has them.
-        # This behavior that can thrash the event queue with unneeded events - events that take negligible
-        # time in the "real world" slow down the simulation considerably and unnecessarily.
-        # This function is used in order to prevent this from happening.
+        # 默认情况下，矿工会尝试将块发送给对等方，即使对等方已经拥有它们。
+        # 这种行为会导致不必要的事件席卷事件队列-在“现实世界”中花费很少时间的事件会大大降低模拟速度，并不必要地降低了模拟速度。
+        # 这个函数是用来防止这种情况发生的。
         sender = self._network[sender_name]
         receiver = self._network[receiver_name]
         return (sender is not None and gid in sender) and (receiver is not None and gid not in receiver)
 
     def send_block(self, sender_name: Miner.Name, receiver_name: Miner.Name, block: Block, delay_time: float):
         """
-        Adds the given block to the miner after the given delay time (given in simulation time-steps).
+        在给定的延迟时间（以仿真时间步长给定）之后，将给定的块添加到矿工。
         """
 
         def send_block_process(env):
@@ -259,7 +251,7 @@ class Simulation:
                 receiver.add_block(copy.deepcopy(block))
             yield env.timeout(0)
 
-        # if the sending is still needed, add an event for it
+        # 如果仍然需要发送，请为其添加一个事件
         if self._check_if_block_needed(sender_name, receiver_name, hash(block)):
             if delay_time <= 0:
                 delay_time = 0.0001
@@ -267,13 +259,13 @@ class Simulation:
 
     def draw_network(self, with_labels: bool = False):
         """
-        Draws the network topology.
+       绘制网络拓扑。
         """
         self._network.draw_network(with_labels)
 
     def draw_dag(self, miner_name: Miner.Name = None, with_labels: bool = False):
         """
-        Draws the DAG of the given miner name (or of of the total network DAG if no name was specified).
+        绘制给定矿工名称的DAG（如果未指定名称，则绘制整个网络DAG的DAG）。
         """
         if miner_name:
             self._network[miner_name].draw_dag(with_labels)
@@ -282,8 +274,8 @@ class Simulation:
 
     def run(self) -> bool:
         """
-        Runs the network_simulation.
-        :return: True iff the attack succeeded.
+        运行network_simulation。
+        :return: 如果攻击成功则Ture
         """
         self._log(str(self) + "\nSimulation start!")
         self._env.process(self._block_generator_process())
@@ -303,8 +295,8 @@ class Simulation:
 
     def end(self) -> bool:
         """
-        Ends the simulation.
-        :return: True iff the attack succeeded.
+        结束模拟。
+        :return:如果攻击成功则Ture。
         """
         if not self._attack_success_event.triggered:
             self._log("attack failed")
@@ -322,7 +314,7 @@ class Simulation:
 
     def __str__(self):
         """
-        :return: a string representation of the simulation.
+        :return: 模拟的字符串表示形式。
         """
         simulation_params = "Simulation is run with the following parameters: \n" + \
                             "Simulation length: " + str(self._simulation_length) + "\n" + \
@@ -331,7 +323,7 @@ class Simulation:
 
     def _get_filename(self) -> str:
         """
-        :return: the name representing this Simulation.
+        :return: 表示此模拟的名称。
         """
         return '_'.join([
             strftime("%Y%m%d-%H%M%S"),
@@ -351,9 +343,8 @@ class Simulation:
 
     def save(self, path: os.PathLike = None):
         """
-        Saves the current simulation to the given path in a file named:
-        time_parameters_attackStatus
-        Note: the event queue isn't saved!
+       将当前模拟保存到名为以下文件的给定路径中：time_parameters_attackStatus
+       注意：事件队列未保存！
         """
         if path is None:
             path = self._DEFAULT_SIMULATION_PATH
@@ -376,7 +367,7 @@ class Simulation:
     @classmethod
     def load(cls, filename: os.PathLike):
         """
-        Loads the simulation saved in the given file.
+        加载保存在给定文件中的仿真。
         """
         # Note: ._env and ._attack_success_event are reset.
         with open(filename, "r") as f:

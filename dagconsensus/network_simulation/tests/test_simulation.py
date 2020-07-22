@@ -3,14 +3,14 @@ import pytest
 from typing import Callable, Iterable
 
 from dagconsensus.dag import Block, DAG, MaliciousDAG
-from dagconsensus.phantom import GreedyPHANTOM
+from dagconsensus.color_order import Greedy
 from dagconsensus.network_simulation import Simulation
 from dagconsensus.network_simulation.run_simulation import competing_chain_constructor_with_parameters
 
 
 class TestSimulation:
     """
-    Test suite for the Simulation class.
+    Simulation类的测试套件。
     """
     ALL_HASH_RATES = [[], [1], [2, 3, 4, 5.5]]
     POISSON_PARAMETERS = [1, 5]
@@ -26,7 +26,7 @@ class TestSimulation:
     @pytest.mark.parametrize("propagation_delay_parameter", POISSON_PARAMETERS)
     @pytest.mark.parametrize("security_parameter", PROBABILITIES)
     @pytest.mark.parametrize("simulation_length", [0, 100])
-    @pytest.mark.parametrize("honest_dag_init", [GreedyPHANTOM])
+    @pytest.mark.parametrize("honest_dag_init", [Greedy])
     @pytest.mark.parametrize("malicious_dag_init", [competing_chain_constructor_with_parameters(1, 1),
                                                     competing_chain_constructor_with_parameters(8, 8),
                                                     ])

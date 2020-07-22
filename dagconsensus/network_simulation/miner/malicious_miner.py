@@ -8,7 +8,7 @@ from .miner import Miner
 
 class MaliciousMiner(Miner):
     """
-    A malicious miner on the network.
+    网络上的恶意矿工
     """
 
     def __init__(self, name: Miner.Name,
@@ -23,7 +23,7 @@ class MaliciousMiner(Miner):
 
     def _broadcast_malicious_block(self, block: Block):
         """
-        Broadcasts a malicious block.
+        广播恶意块.
         """
         self._network.add_block(block)
         self._blocks_to_broadcast_queue.append(block)
@@ -31,7 +31,7 @@ class MaliciousMiner(Miner):
 
     def _broadcast_block_queue(self):
         """
-        Broadcasts all selfish blocks if possible.
+        尽可能广播所有自私的块.
         """
         attack_success = self._dag.did_attack_succeed()
         if self._dag.did_attack_fail() or attack_success:
@@ -42,15 +42,15 @@ class MaliciousMiner(Miner):
 
     def add_block(self, block: Block) -> bool:
         addition_success = super().add_block(block)
-        self._broadcast_block_queue()   # every new block might influence that attack's status (success/failure)
+        self._broadcast_block_queue()   # 每个新的阻止都可能影响该攻击的状态（成功/失败）
         return addition_success
 
     def mine_block(self) -> Block:
         gid = hash(uuid.uuid4().int)
         block = Block(global_id=gid,
                       parents=self._dag.get_virtual_block_parents(is_malicious=True).copy(),
-                      size=self._block_size,  # assume for the simulation's purposes that blocks are maximal
-                      data=self._name)  # use the data field to hold the miner's name for better logs
+                      size=self._block_size,  #出于仿真目的，假设块最大
+                      data=self._name)  # 使用data字段保存矿机的名称，以获得更好的日志
         self._dag.add(block, is_malicious=True)
         self._broadcast_malicious_block(block)
         self._mined_blocks_gids.add(gid)
