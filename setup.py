@@ -8,7 +8,7 @@ def readme():
 
 setup(
     name='phantom',
-    version='0.041',
+    version='0.41',
     description='An efficient implementation of the PHANTOM block-DAG protocol.',
     url='https://github.cs.huji.ac.il/aviv-yaish/PHANTOM',
     author='Aviv Yaish',

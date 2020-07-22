@@ -61,22 +61,22 @@ class Mirage(DAG):
 
     def __get_past(self, global_id: Block.GlobalID):
         """
-        :param global_id: global id of a block in the DAG.
-        :return: the past of the block with the given global id.
+        :param global_id: DAG中块的全局id。
+        :return: 具有给定全局id的块的过去集合。
         """
         return nx.descendants(self._G, global_id)
 
     def __get_future(self, global_id: Block.GlobalID):
         """
-        :param global_id: global id of a block in the DAG.
-        :return: the future of the block with the given global id.
+        :param global_id: DAG中块的全局id。
+        :return: 具有给定全局id的块的未来集合。
         """
         return nx.ancestors(self._G, global_id)
 
     def __get_anticone(self, global_id: Block.GlobalID):
         """
-        :param global_id: global id of a block in the DAG.
-        :return: the anticone of the block with the given global id.
+        :param global_id: DAG中块的全局id。
+        :return: 具有给定全局id的块的无关集合。
         """
         block_cone = {global_id}.union(self.__get_past(global_id), self.__get_future(global_id))
         return set(self._G.nodes()).difference(block_cone)
@@ -88,25 +88,25 @@ class Mirage(DAG):
         global_id = hash(block)
         parents = block.get_parents()
 
-        # add the block to the phantom
+        # 添加块
         self._G.add_node(global_id)
         self._G.node[global_id][self._BLOCK_DATA_KEY] = block
         for parent in parents:
             self._G.add_edge(global_id, parent)
 
-        # update the leaves
+        # 更新叶子
         self._leaves -= parents
         self._leaves.add(global_id)
 
-        # update the coloring of the graph and everything related (the blue anticones and the topological order too)
+        # 更新图的颜色和所有相关的东西(蓝色的反锥和拓扑顺序)
         self._update_coloring_incrementally(global_id)
         self._update_topological_order_incrementally(global_id)
 
     def _update_coloring_incrementally(self, global_id: Block.GlobalID):
         """
-        Updates the coloring of the phantom.
+        更新颜色。
         The coloring is a maximal subset of the blocks V' such that for each v in V': |anticone(v, coloring)| <= k.
-        :param global_id: the block to add to the coloring. Must be in the DAG.
+        :param global_id:块添加到着色。 必须在DAG中。
         """
         def powerset(iterable):
             """powerset([1,2,3]) --> () (1,) (2,) (3,) (1,2) (1,3) (2,3) (1,2,3)"""
@@ -126,13 +126,13 @@ class Mirage(DAG):
                     return None
             return blue_bacs
 
-        # calculate the regular anticones
+        # 计算正则反锥
         anticones = dict()
         for block in self._G.nodes():
             anticones[block] = self.__get_anticone(block)
 
-        # this is the brute force approach:
-        # go over all colorings, and find the maximal valid one.
+        # 这是蛮力方法：
+        # 遍历所有的颜色，找出最大的有效颜色。
         max_coloring = set()
         max_coloring_bac = dict()
 
@@ -146,15 +146,15 @@ class Mirage(DAG):
 
         self._coloring = max_coloring
 
-        # update the blue anticones according to the new coloring
+        # 根据新的颜色更新蓝色的反锥
         for block, blue_anticone in max_coloring_bac.items():
             self._G.node[block][self._BAC_KEY] = blue_anticone
 
     @staticmethod
     def calculate_k(propagation_delay_parameter: float = 60, security_parameter: float = 0.1):
         """
-        :param propagation_delay_parameter: the upper bound on the propagation delay, measured in seconds.
-        :param security_parameter: the DAG's security parameter, it is a probability.
+        :param propagation_delay_parameter: 传播延迟的上限，以秒为单位测量。
+        :param security_parameter: DAG的安全性参数，这是一个概率。
         :return: the parameter k as defined in the phantom paper.
         """
         # TODO: calculate k
@@ -162,7 +162,7 @@ class Mirage(DAG):
 
     def _set_parameters(self, parameters: Dict):
         """
-        Sets all the given parameters.
+       设置所有给定参数。
         """
         new_dag = type(self)(**parameters)
         for global_id in self:
@@ -172,38 +172,38 @@ class Mirage(DAG):
 
     def set_k(self, k: int):
         """
-        :param k: the maximal anticone size for the blue blocks.
+        :param k: 蓝色块的最大anticone尺寸。
         """
         self._set_parameters({'k': k})
 
     def _is_blue(self, global_id: Block.GlobalID) -> bool:
         """
-        :param global_id: global id of a block in the DAG.
-        :return: True iff the block with the given global id is blue.
+        :param global_id: DAG中块的全局id。
+        :return: 如果具有给定全局id的块为蓝色，则为真。
         """
         return global_id in self._coloring
 
     def _get_coloring(self):
         """
-        :return: the global ids of all the blue blocks in the DAG.
+        :return: DAG中所有蓝色块的全局ID。
         """
         return self._coloring
 
     def _update_topological_order_incrementally(self, global_id: Block.GlobalID):
         """
-        Updates the topological order of the DAG.
-        :param global_id: the global id of the newly added block.
+        更新DAG的拓扑顺序。
+        :param global_id: 新添加的块的全局ID。
         """
         class TopologicalOrderer:
             """
-            Given a phantom, this class can output a topological order on each subset of the phantom.
+            给定一个DAG，这个类可以对DAG的每个子集输出一个拓扑顺序。
             """
 
             def __init__(self, graph, coloring):
                 """
-                Initializes the topological orderer.
-                :param graph: the graph to order.
-                :param coloring: the coloring of G.
+                初始化拓扑顺序
+                :param graph: 要排序的图形
+                :param coloring: G的着色问题。
                 """
                 self._ordered = set()
                 self._G = graph
@@ -211,8 +211,8 @@ class Mirage(DAG):
 
             def get_topological_order(self, leaves):
                 """
-                :param leaves: leaves of a phantom.
-                :return: a list sorted according to a topological order on the input leaves and their ancestors.
+                :param leaves: DAG的叶子。
+                :return: 根据输入叶及其祖先的拓扑顺序排序的列表。
                 """
                 cur_order = []
                 leaves = leaves - self._ordered
@@ -235,7 +235,7 @@ class Mirage(DAG):
 
     def _get_local_id(self, global_id: Block.GlobalID) -> float:
         """
-        :return: the local id of the block with the given global id.
+        :return: 具有给定全局ID的块的本地ID
         """
         return self._G.node[global_id][self._LID_KEY]
 
@@ -251,21 +251,20 @@ class Mirage(DAG):
         return self._get_local_id(a) <= self._get_local_id(b)
 
     def get_depth(self, global_id: Block.GlobalID) -> float:
-        # The notion of depth is the same for brute-force phantom as it is for the greedy phantom.
-        # But, as the run-time complexity is so high, when the DAG is complex enough to actually query about a block's
-        # depth, it will probably take too long to actually color the DAG and calculate the depth.
+        # 深度的概念对于暴力算法和贪婪算法是相同的。
+        # 但是，由于运行时的复杂性如此之高，当DAG复杂到足以实际查询块的深度时，实际给DAG上色并计算深度可能会花费太长时间。
         return -float('inf')
 
     def _get_genesis_global_id(self) -> Block.GlobalID:
         """
-        :return: the global id of the genesis block.
+        :return: Genesis块的全局ID
         """
         return self._genesis_gid
 
     def _get_draw_color(self, global_id: Block.GlobalID):
         """
-        :param global_id: the global id of the block to be drawn.
-        :return: a string of the color to use when drawing the block with the given global id
+        :param global_id: 要绘制的块的全局ID。
+        :return: 绘制具有给定全局ID的块时使用的颜色字符串
         """
         pass
 
@@ -273,16 +272,15 @@ class Mirage(DAG):
         def dag_layout(digraph, genesis_global_id: Block.GlobalID):
             """
             :param digraph: a networkx DiGraph.
-            :param genesis_global_id: the block that should be the leftmost.
-            :return: generates a layout positioning dictionary for the given DiGraph such that the block with the
-            genesis global ID is the first (leftmost) block.
+            :param genesis_global_id: 该块应该在最左边。
+            :return: 生成给定DiGraph的布局定位字典，以使具有创世全局ID的块为第一个（最左侧）块。
             """
             cur_height = 0
             blocks_left_in_cur_height = 1
             blocks_left_in_next_height = 0
 
-            height_to_blocks = {cur_height: OrderedSet()}  # a mapping from height to all the blocks of that height
-            blocks_to_height = {}   # a mapping between each block and its height
+            height_to_blocks = {cur_height: OrderedSet()}  # 从高度到该高度的所有块的映射
+            blocks_to_height = {}   # 每个块及其高度之间的映射
 
             block_queue = deque([genesis_global_id])
             while block_queue:
@@ -303,7 +301,7 @@ class Mirage(DAG):
                     blocks_left_in_cur_height = blocks_left_in_next_height
                     blocks_left_in_next_height = 0
 
-            pos = {}  # the position dictionary for matplotlib's draw function
+            pos = {}  # Matplotlib绘图函数的位置字典
             for height, blocks in height_to_blocks.items():
                 blocks_left_in_cur_height = len(blocks)
                 cur_y = (blocks_left_in_cur_height - 1) / 2
